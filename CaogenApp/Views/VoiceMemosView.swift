@@ -1,32 +1,10 @@
 import SwiftUI
 import AVFoundation
+import CoreData
 
-// 语音备忘模型
-struct VoiceMemo: Identifiable, Codable {
-    let id: UUID
-    var title: String
-    var audioURL: URL?
-    var duration: TimeInterval
-    var transcript: String?
-    var tags: [String]
-    var createdAt: Date
-    var updatedAt: Date
-
-    init(title: String = "", audioURL: URL? = nil, duration: TimeInterval = 0, transcript: String? = nil, tags: [String] = []) {
-        self.id = UUID()
-        self.title = title
-        self.audioURL = audioURL
-        self.duration = duration
-        self.transcript = transcript
-        self.tags = tags
-        self.createdAt = Date()
-        self.updatedAt = Date()
-    }
-}
-
-// 语音备忘管理器
+// 语音备忘管理器 - 使用 CoreData
 class VoiceMemoManager: ObservableObject {
-    @Published var memos: [VoiceMemo] = []
+    @Published var memos: [NSManagedObject] = []
     @Published var isRecording = false
     @Published var recordingDuration: TimeInterval = 0
     @Published var isPlaying = false
@@ -36,6 +14,7 @@ class VoiceMemoManager: ObservableObject {
     private var audioPlayer: AVAudioPlayer?
     private var recordingTimer: Timer?
     private var playbackTimer: Timer?
+    private let dataManager = DataManager.shared
 
     init() {
         loadMemos()
@@ -43,17 +22,18 @@ class VoiceMemoManager: ObservableObject {
 
     // 加载备忘
     func loadMemos() {
-        if let data = UserDefaults.standard.data(forKey: "voice_memos"),
-           let decoded = try? JSONDecoder().decode([VoiceMemo].self, from: data) {
-            memos = decoded.sorted { $0.createdAt > $1.createdAt }
-        }
+        memos = dataManager.fetchVoiceMemos().map { $0 as NSManagedObject }
     }
 
     // 保存备忘
-    func saveMemos() {
-        if let encoded = try? JSONEncoder().encode(memos) {
-            UserDefaults.standard.set(encoded, forKey: "voice_memos")
-        }
+    func saveMemo(title: String, content: String, audioURL: String? = nil, duration: TimeInterval = 0.0) {
+        let memo = dataManager.createVoiceMemo(
+            title: title,
+            content: content,
+            audioURL: audioURL,
+            duration: duration
+        )
+        loadMemos()
     }
 
     // 开始录音

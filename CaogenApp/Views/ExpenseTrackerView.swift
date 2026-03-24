@@ -1,83 +1,69 @@
 import SwiftUI
 import Charts
+import CoreData
 
-// 支出记录
-struct Expense: Identifiable, Codable {
-    let id: UUID
-    var amount: Double
-    var category: ExpenseCategory
-    var note: String
-    var date: Date
+// 支出类别
+enum ExpenseCategory: String, Codable, CaseIterable {
+    case food = "餐饮"
+    case transport = "交通"
+    case shopping = "购物"
+    case entertainment = "娱乐"
+    case housing = "住房"
+    case healthcare = "医疗"
+    case education = "教育"
+    case other = "其他"
 
-    enum ExpenseCategory: String, Codable, CaseIterable {
-        case food = "餐饮"
-        case transport = "交通"
-        case shopping = "购物"
-        case entertainment = "娱乐"
-        case housing = "住房"
-        case healthcare = "医疗"
-        case education = "教育"
-        case other = "其他"
-
-        var icon: String {
-            switch self {
-            case .food: return "fork.knife"
-            case .transport: return "car.fill"
-            case .shopping: return "bag.fill"
-            case .entertainment: return "gamecontroller.fill"
-            case .housing: return "house.fill"
-            case .healthcare: return "heart.fill"
-            case .education: return "book.fill"
-            case .other: return "ellipsis.circle.fill"
-            }
-        }
-
-        var color: Color {
-            switch self {
-            case .food: return .orange
-            case .transport: return .blue
-            case .shopping: return .pink
-            case .entertainment: return .purple
-            case .housing: return .green
-            case .healthcare: return .red
-            case .education: return .yellow
-            case .other: return .gray
-            }
+    var icon: String {
+        switch self {
+        case .food: return "fork.knife"
+        case .transport: return "car.fill"
+        case .shopping: return "bag.fill"
+        case .entertainment: return "gamecontroller.fill"
+        case .housing: return "house.fill"
+        case .healthcare: return "heart.fill"
+        case .education: return "book.fill"
+        case .other: return "ellipsis.circle.fill"
         }
     }
 
-    init(amount: Double, category: ExpenseCategory, note: String = "", date: Date = Date()) {
-        self.id = UUID()
-        self.amount = amount
-        self.category = category
-        self.note = note
-        self.date = date
+    var color: Color {
+        switch self {
+        case .food: return .orange
+        case .transport: return .blue
+        case .shopping: return .pink
+        case .entertainment: return .purple
+        case .housing: return .green
+        case .healthcare: return .red
+        case .education: return .yellow
+        case .other: return .gray
+        }
     }
 }
 
-// 记账管理器
+// 记账管理器 - 使用 CoreData
 class ExpenseManager: ObservableObject {
-    @Published var expenses: [Expense] = []
+    @Published var expenses: [NSManagedObject] = []
+    @Published var selectedCategory: ExpenseCategory = .food
+
+    private let dataManager = DataManager.shared
 
     init() {
         loadExpenses()
     }
 
     func loadExpenses() {
-        if let data = UserDefaults.standard.data(forKey: "expenses"),
-           let decoded = try? JSONDecoder().decode([Expense].self, from: data) {
-            expenses = decoded.sorted { $0.date > $1.date }
-        }
+        expenses = dataManager.fetchExpenseRecords().map { $0 as NSManagedObject }
     }
 
-    func saveExpenses() {
-        if let encoded = try? JSONEncoder().encode(expenses) {
-            UserDefaults.standard.set(encoded, forKey: "expenses")
-        }
+    func addExpense(amount: Double, category: ExpenseCategory, note: String = "", paymentMethod: String = "") {
+        _ = dataManager.createExpenseRecord(
+            amount: amount,
+            category: category.rawValue,
+            description: note.isEmpty ? nil : note,
+            paymentMethod: paymentMethod.isEmpty ? nil : paymentMethod
+        )
+        loadExpenses()
     }
-
-    func addExpense(_ expense: Expense) {
-        expenses.insert(expense, at: 0)
         saveExpenses()
     }
 

@@ -1,83 +1,30 @@
 import SwiftUI
 import Charts
+import CoreData
 
-// 习惯模型
-struct Habit: Identifiable, Codable {
-    let id: UUID
-    var name: String
-    var icon: String
-    var color: String
-    var targetDays: [Int] // 0=周日, 1=周一, ...
-    var reminderTime: Date?
-    var createdAt: Date
-    var completions: [Date]
-
-    init(name: String, icon: String, color: String, targetDays: [Int], reminderTime: Date? = nil) {
-        self.id = UUID()
-        self.name = name
-        self.icon = icon
-        self.color = color
-        self.targetDays = targetDays
-        self.reminderTime = reminderTime
-        self.createdAt = Date()
-        self.completions = []
-    }
-
-    var isCompletedToday: Bool {
-        let today = Calendar.current.startOfDay(for: Date())
-        return completions.contains { Calendar.current.isDate($0, inSameDayAs: today) }
-    }
-
-    var currentStreak: Int {
-        var streak = 0
-        var date = Date()
-
-        for i in 0..<365 {
-            let checkDate = Calendar.current.date(byAdding: .day, value: -i, to: date)!
-            let dayOfWeek = Calendar.current.component(.weekday, from: checkDate) - 1
-
-            if targetDays.contains(dayOfWeek) {
-                let dayStart = Calendar.current.startOfDay(for: checkDate)
-                if completions.contains(where: { Calendar.current.isDate($0, inSameDayAs: dayStart) }) {
-                    streak += 1
-                } else {
-                    break
-                }
-            }
-        }
-
-        return streak
-    }
-
-    var completionRate: Double {
-        let daysSinceCreated = max(1, Calendar.current.dateComponents([.day], from: createdAt, to: Date()).day!)
-        let expectedCompletions = targetDays.count * (daysSinceCreated / 7) * 7
-        return Double(completions.count) / Double(max(1, expectedCompletions)) * 100
-    }
-}
-
-// 习惯管理器
+// 习惯管理器 - 使用 CoreData
 class HabitManager: ObservableObject {
-    @Published var habits: [Habit] = []
+    @Published var habits: [NSManagedObject] = []
+
+    private let dataManager = DataManager.shared
 
     init() {
         loadHabits()
     }
 
     func loadHabits() {
-        if let data = UserDefaults.standard.data(forKey: "habits"),
-           let decoded = try? JSONDecoder().decode([Habit].self, from: data) {
-            habits = decoded
-        }
+        habits = dataManager.fetchHabits().map { $0 as NSManagedObject }
     }
 
-    func saveHabits() {
-        if let encoded = try? JSONEncoder().encode(habits) {
-            UserDefaults.standard.set(encoded, forKey: "habits")
-        }
+    func addHabit(name: String, icon: String, color: String, targetDays: Int = 30) {
+        _ = dataManager.createHabit(
+            title: name,
+            description: "\(icon) - \(color)",
+            frequency: "daily",
+            targetDays: targetDays
+        )
+        loadHabits()
     }
-
-    func addHabit(_ habit: Habit) {
         habits.append(habit)
         saveHabits()
     }
