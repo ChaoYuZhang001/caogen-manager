@@ -21,9 +21,9 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            // 基础功能
-            ChatView()
-                .tabItem { Label("聊天", systemImage: "message.fill") }
+            // Tab 0: AI 助手（JVS Claw 风格）⭐
+            JVSHomePage()
+                .tabItem { Label("AI 助手", systemImage: "sparkles") }
                 .tag(0)
 
             VoiceAssistantView()
