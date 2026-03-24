@@ -39,11 +39,17 @@ struct MainTabView: View {
                 }
                 .tag(2)
 
+            PluginStoreView()
+                .tabItem {
+                    Label("插件市场", systemImage: "square.grid.2x2.fill")
+                }
+                .tag(3)
+
             SettingsView()
                 .tabItem {
                     Label("设置", systemImage: "gearshape.fill")
                 }
-                .tag(3)
+                .tag(4)
         }
         .accentColor(.green)
     }
