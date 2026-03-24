@@ -71,4 +71,8 @@ app.get('/health', async (req, res) => {
 // Apple 登录路由
 app.use('/api/auth', authRoutes);
 
+// 草包 AI 路由
+const caobaoRoutes = require('./routes/caobao.route');
+app.use('/api/caobao', caobaoRoutes);
+
 // 1. 聊天接口
