@@ -33,23 +33,41 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
+            VoiceMemosView()
+                .tabItem {
+                    Label("语音备忘", systemImage: "waveform")
+                }
+                .tag(2)
+
             QuickActionsView()
                 .tabItem {
                     Label("快捷指令", systemImage: "bolt.fill")
                 }
-                .tag(2)
+                .tag(3)
+
+            CollectionsView()
+                .tabItem {
+                    Label("收藏", systemImage: "star.fill")
+                }
+                .tag(4)
+
+            HealthView()
+                .tabItem {
+                    Label("健康", systemImage: "heart.fill")
+                }
+                .tag(5)
 
             PluginStoreView()
                 .tabItem {
-                    Label("插件市场", systemImage: "square.grid.2x2.fill")
+                    Label("插件", systemImage: "square.grid.2x2.fill")
                 }
-                .tag(3)
+                .tag(6)
 
             SettingsView()
                 .tabItem {
                     Label("设置", systemImage: "gearshape.fill")
                 }
-                .tag(4)
+                .tag(7)
         }
         .accentColor(.green)
     }
