@@ -21,77 +21,70 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
+            // 基础功能
             ChatView()
-                .tabItem {
-                    Label("聊天", systemImage: "message.fill")
-                }
+                .tabItem { Label("聊天", systemImage: "message.fill") }
                 .tag(0)
 
             VoiceAssistantView()
-                .tabItem {
-                    Label("语音", systemImage: "mic.fill")
-                }
+                .tabItem { Label("语音", systemImage: "mic.fill") }
                 .tag(1)
 
             VoiceMemosView()
-                .tabItem {
-                    Label("备忘", systemImage: "waveform")
-                }
+                .tabItem { Label("备忘", systemImage: "waveform") }
                 .tag(2)
 
+            // 生活工具
             WeatherView()
-                .tabItem {
-                    Label("天气", systemImage: "cloud.sun.fill")
-                }
+                .tabItem { Label("天气", systemImage: "cloud.sun.fill") }
                 .tag(3)
 
             TranslationView()
-                .tabItem {
-                    Label("翻译", systemImage: "globe")
-                }
+                .tabItem { Label("翻译", systemImage: "globe") }
                 .tag(4)
 
             OCRView()
-                .tabItem {
-                    Label("OCR", systemImage: "doc.text.viewfinder")
-                }
+                .tabItem { Label("OCR", systemImage: "doc.text.viewfinder") }
                 .tag(5)
 
+            // 健康
             HabitTrackerView()
-                .tabItem {
-                    Label("习惯", systemImage: "checkmark.circle.fill")
-                }
+                .tabItem { Label("习惯", systemImage: "checkmark.circle.fill") }
                 .tag(6)
 
-            QuickActionsView()
-                .tabItem {
-                    Label("快捷", systemImage: "bolt.fill")
-                }
+            HealthView()
+                .tabItem { Label("健康", systemImage: "heart.fill") }
                 .tag(7)
 
-            CollectionsView()
-                .tabItem {
-                    Label("收藏", systemImage: "star.fill")
-                }
+            LifeTrackingView()
+                .tabItem { Label("生活", systemImage: "house.fill") }
                 .tag(8)
 
-            HealthView()
-                .tabItem {
-                    Label("健康", systemImage: "heart.fill")
-                }
+            ExpenseTrackerView()
+                .tabItem { Label("记账", systemImage: "dollarsign.circle.fill") }
                 .tag(9)
 
-            PluginStoreView()
-                .tabItem {
-                    Label("插件", systemImage: "square.grid.2x2.fill")
-                }
+            SmartRemindersView()
+                .tabItem { Label("提醒", systemImage: "bell.fill") }
                 .tag(10)
 
-            SettingsView()
-                .tabItem {
-                    Label("设置", systemImage: "gearshape.fill")
-                }
+            // 数据
+            QuickActionsView()
+                .tabItem { Label("快捷", systemImage: "bolt.fill") }
                 .tag(11)
+
+            CollectionsView()
+                .tabItem { Label("收藏", systemImage: "star.fill") }
+                .tag(12)
+
+            // 扩展
+            PluginStoreView()
+                .tabItem { Label("插件", systemImage: "square.grid.2x2.fill") }
+                .tag(13)
+
+            SettingsView()
+                .tabItem { Label("设置", systemImage: "gearshape.fill") }
+                .tag(14)
         }
         .accentColor(.green)
     }
