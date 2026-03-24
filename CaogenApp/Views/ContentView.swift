@@ -33,20 +33,32 @@ struct MainTabView: View {
                 }
                 .tag(1)
 
+            QuickActionsView()
+                .tabItem {
+                    Label("快捷指令", systemImage: "bolt.fill")
+                }
+                .tag(2)
+
             SettingsView()
                 .tabItem {
                     Label("设置", systemImage: "gearshape.fill")
                 }
-                .tag(2)
+                .tag(3)
         }
         .accentColor(.green)
     }
 }
 
+// 预览
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
             .environmentObject(AuthManager())
             .environmentObject(ChatManager())
+            .environmentObject(SettingsManager.shared)
+            .environmentObject(QuickActionManager())
+            .environmentObject(ThemeManager())
+            .environmentObject(AccessibilityManager())
+            .environmentObject(FontSizeManager())
     }
 }
