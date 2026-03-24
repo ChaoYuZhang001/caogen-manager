@@ -29,45 +29,69 @@ struct MainTabView: View {
 
             VoiceAssistantView()
                 .tabItem {
-                    Label("语音助手", systemImage: "mic.fill")
+                    Label("语音", systemImage: "mic.fill")
                 }
                 .tag(1)
 
             VoiceMemosView()
                 .tabItem {
-                    Label("语音备忘", systemImage: "waveform")
+                    Label("备忘", systemImage: "waveform")
                 }
                 .tag(2)
 
-            QuickActionsView()
+            WeatherView()
                 .tabItem {
-                    Label("快捷指令", systemImage: "bolt.fill")
+                    Label("天气", systemImage: "cloud.sun.fill")
                 }
                 .tag(3)
+
+            TranslationView()
+                .tabItem {
+                    Label("翻译", systemImage: "globe")
+                }
+                .tag(4)
+
+            OCRView()
+                .tabItem {
+                    Label("OCR", systemImage: "doc.text.viewfinder")
+                }
+                .tag(5)
+
+            HabitTrackerView()
+                .tabItem {
+                    Label("习惯", systemImage: "checkmark.circle.fill")
+                }
+                .tag(6)
+
+            QuickActionsView()
+                .tabItem {
+                    Label("快捷", systemImage: "bolt.fill")
+                }
+                .tag(7)
 
             CollectionsView()
                 .tabItem {
                     Label("收藏", systemImage: "star.fill")
                 }
-                .tag(4)
+                .tag(8)
 
             HealthView()
                 .tabItem {
                     Label("健康", systemImage: "heart.fill")
                 }
-                .tag(5)
+                .tag(9)
 
             PluginStoreView()
                 .tabItem {
                     Label("插件", systemImage: "square.grid.2x2.fill")
                 }
-                .tag(6)
+                .tag(10)
 
             SettingsView()
                 .tabItem {
                     Label("设置", systemImage: "gearshape.fill")
                 }
-                .tag(7)
+                .tag(11)
         }
         .accentColor(.green)
     }
