@@ -8,12 +8,23 @@ struct SettingsView: View {
     @EnvironmentObject var fontSizeManager: FontSizeManager
     @EnvironmentObject var accessibilityManager: AccessibilityManager
     @EnvironmentObject var quickActionManager: QuickActionManager
+    
+    // 新增：AI能力管理器
+    @StateObject private var deepMemory = DeepMemoryManager.shared
+    @StateObject private var emotionAI = EmotionAIManager.shared
+    @StateObject private var intentUnderstanding = IntentUnderstandingManager.shared
+    @StateObject private var predictionAI = PredictionAIManager.shared
+    @StateObject private var personalization = PersonalizationEngine.shared
+    @StateObject private var proactiveCare = ProactiveCareManager.shared
+    @StateObject private var automation = AutomationManager.shared
 
     @State private var serverURL: String = ""
     @State private var showAbout = false
     @State private var showPrivacyPolicy = false
     @State private var showTermsOfService = false
     @State private var showDataManagement = false
+    @State private var showAIAbilities = false
+    @State private var showAutomationTasks = false
 
     var body: some View {
         NavigationView {
@@ -83,6 +94,60 @@ struct SettingsView: View {
                     }
                 }
 
+                // 新增：AI能力
+                Section("AI能力") {
+                    NavigationLink(destination: AIAbilitiesView()) {
+                        HStack {
+                            Image(systemName: "brain")
+                            Text("AI能力概览")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    HStack {
+                        Image(systemName: "brain.fill")
+                        Text("深度记忆")
+                        Spacer()
+                        let stats = deepMemory.getStatistics()
+                        Text("\(stats["totalMemories"] ?? 0) 条记忆")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack {
+                        Image(systemName: "heart.fill")
+                        Text("情感识别")
+                        Spacer()
+                        Text("\(emotionAI.emotionHistory.count) 次识别")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    HStack {
+                        Image(systemName: "sparkles")
+                        Text("个性化推荐")
+                        Spacer()
+                        Text("\(personalization.recommendations.count) 个推荐")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Button(action: { showAutomationTasks = true }) {
+                        HStack {
+                            Image(systemName: "gearshape.2")
+                            Text("自动化任务")
+                            Spacer()
+                            Text("\(automation.automationTasks.count) 个任务")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
                 // 无障碍设置
                 Section("无障碍") {
                     Toggle("语音反馈", isOn: Binding(
@@ -130,6 +195,15 @@ struct SettingsView: View {
                         }
                         .foregroundColor(.red)
                     }
+                    
+                    // 新增：AI数据管理
+                    Button(action: clearAIData) {
+                        HStack {
+                            Image(systemName: "trash.circle")
+                            Text("清除AI数据")
+                        }
+                        .foregroundColor(.orange)
+                    }
                 }
 
                 // 快捷指令
@@ -173,7 +247,7 @@ struct SettingsView: View {
                     HStack {
                         Text("版本")
                         Spacer()
-                        Text("1.0.0")
+                        Text("2.0.0 (AI增强版)")
                             .foregroundColor(.secondary)
                     }
 
@@ -210,6 +284,12 @@ struct SettingsView: View {
             .sheet(isPresented: $showTermsOfService) {
                 TermsOfServiceView()
             }
+            .sheet(isPresented: $showAIAbilities) {
+                AIAbilitiesView()
+            }
+            .sheet(isPresented: $showAutomationTasks) {
+                AutomationTasksView()
+            }
         }
     }
 
@@ -222,23 +302,384 @@ struct SettingsView: View {
         // TODO: 确认后清除
         print("清除聊天记录")
     }
+    
+    // 新增：清除AI数据
+    private func clearAIData() {
+        deepMemory.clearAllMemories()
+        emotionAI.clearEmotionHistory()
+        intentUnderstanding.clearRecentIntents()
+        predictionAI.clearPredictionData()
+        personalization.clearRecommendations()
+        proactiveCare.clearCareActions()
+        automation.clearAutomationTasks()
+        print("🧠 AI数据已清除")
+    }
 
     private func logout() {
         authManager.logout()
     }
 }
 
-// 预览
-struct SettingsView_Previews: PreviewProvider {
-    static var previews: some View {
-        SettingsView()
-            .environmentObject(SettingsManager.shared)
-            .environmentObject(AuthManager())
-            .environmentObject(ThemeManager())
-            .environmentObject(LocalizationManager())
-            .environmentObject(FontSizeManager())
-            .environmentObject(AccessibilityManager())
-            .environmentObject(QuickActionManager())
+// 新增：AI能力概览视图
+struct AIAbilitiesView: View {
+    @Environment(\.dismiss) var dismiss
+    @StateObject private var deepMemory = DeepMemoryManager.shared
+    @StateObject private var emotionAI = EmotionAIManager.shared
+    @StateObject private var intentUnderstanding = IntentUnderstandingManager.shared
+    @StateObject private var predictionAI = PredictionAIManager.shared
+    @StateObject private var personalization = PersonalizationEngine.shared
+    @StateObject private var proactiveCare = ProactiveCareManager.shared
+    @StateObject private var automation = AutomationManager.shared
+    
+    var body: some View {
+        NavigationView {
+            List {
+                // 深度记忆
+                Section("🧠 深度记忆系统") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("记住你的一切：你的喜好、习惯、关系、目标")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        let stats = deepMemory.getStatistics()
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text("总记忆数")
+                                Spacer()
+                                Text("\(stats["totalMemories"] ?? 0)")
+                                    .foregroundColor(.green)
+                            }
+                            HStack {
+                                Text("长期记忆")
+                                Spacer()
+                                Text("\(stats["longTerm"] ?? 0)")
+                                    .foregroundColor(.blue)
+                            }
+                            HStack {
+                                Text("中期记忆")
+                                Spacer()
+                                Text("\(stats["mediumTerm"] ?? 0)")
+                                    .foregroundColor(.orange)
+                            }
+                        }
+                        .font(.caption)
+                    }
+                    
+                    Button(action: {
+                        personalization.initializeProfile()
+                    }) {
+                        Text("初始化用户画像")
+                    }
+                }
+                
+                // 情感AI
+                Section("❤️ 情感AI系统") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("识别20种情绪，比用户更懂用户的心情")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("最近识别的情绪：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            if !emotionAI.emotionHistory.isEmpty {
+                                let recentEmotions = emotionAI.emotionHistory.suffix(5)
+                                ForEach(recentEmotions.reversed()) { result in
+                                    HStack {
+                                        Text(result.emotion.emoji)
+                                        Text(result.emotion.rawValue)
+                                        Spacer()
+                                        Text("\(result.detectedAt, style: .time)")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .font(.caption)
+                                }
+                            }
+                        }
+                    }
+                    
+                    Button(action: {
+                        // 测试情感识别
+                        if let testResult = emotionAI.recognizeEmotion(from: "我今天很开心") {
+                            print("测试结果：\(testResult.emotion.rawValue)")
+                        }
+                    }) {
+                        Text("测试情感识别")
+                    }
+                }
+                
+                // 智能理解
+                Section("🎯 智能理解系统") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("理解用户的每一个指令，即使不说完整")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("支持的能力：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            Text("• 复合意图识别")
+                                .font(.caption)
+                            Text("• 模糊意图理解")
+                                .font(.caption)
+                            Text("• 上下文推理")
+                                .font(.caption)
+                            Text("• 场景理解")
+                                .font(.caption)
+                        }
+                    }
+                    
+                    Button(action: {
+                        // 测试意图识别
+                        if let testResult = intentUnderstanding.recognizeIntent(from: "查一下天气") {
+                            print("测试结果：\(testResult.primaryIntent.rawValue)")
+                        }
+                    }) {
+                        Text("测试意图识别")
+                    }
+                }
+                
+                // 预测AI
+                Section("🔮 预测AI系统") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("预测用户的行为、需求、情绪、场景")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("支持预测：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                
+                            Text("• 行为预测")
+                                .font(.caption)
+                            Text("• 需求预测")
+                                .font(.caption)
+                            Text("• 情绪预测")
+                                .font(.caption)
+                            Text("• 场景预测")
+                                .font(.caption)
+                        }
+                        
+                        Divider()
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("预测统计：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                
+                            Text("行为模式：\(predictionAI.behaviorPatterns.count)")
+                                .font(.caption)
+                            Text("用户需求：\(predictionAI.userNeeds.count)")
+                                .font(.caption)
+                        }
+                    }
+                }
+                
+                // 个性化推荐
+                Section("🎨 个性化推荐") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("基于你的画像，推荐最适合你的")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("推荐类型：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                
+                            Text("• 基于画像推荐")
+                                .font(.caption)
+                            Text("• 基于上下文推荐")
+                                .font(.caption)
+                            Text("• 协同过滤推荐")
+                                .font(.caption)
+                        }
+                        
+                        Divider()
+                        
+                        Text("已生成推荐：\(personalization.recommendations.count) 个")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                    }
+                    
+                    Button(action: {
+                        _ = personalization.generateRecommendations()
+                    }) {
+                        Text("生成推荐")
+                    }
+                }
+                
+                // 主动关怀
+                Section("💡 主动关怀") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("在你需要之前就已经准备好了")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("关怀类型：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                
+                            Text("• 基于时间的关怀")
+                                .font(.caption)
+                            Text("• 基于情绪的关怀")
+                                .font(.caption)
+                            Text("• 基于行为的关怀")
+                                .font(.caption)
+                            Text("• 基于场景的关怀")
+                                .font(.caption)
+                        }
+                        
+                        Divider()
+                        
+                        Text("关怀动作：\(proactiveCare.careActions.count) 个")
+                            .font(.caption)
+                            .foregroundColor(.green)
+                        Text("已触发：\(proactiveCare.triggeredActions.count) 次")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                    }
+                }
+                
+                // 自动化
+                Section("🔄 自动化系统") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("学习你的习惯，越用越聪明")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("支持功能：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                
+                            Text("• 自动学习用户习惯")
+                                .font(.caption)
+                            Text("• 自动执行任务")
+                                .font(.caption)
+                            Text("• 自动优化建议")
+                                .font(.caption)
+                        }
+                        
+                        Divider()
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("统计信息：")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                
+                            Text("自动化任务：\(automation.automationTasks.count)")
+                                .font(.caption)
+                            Text("已执行：\(automation.executionHistory.count) 次")
+                                .font(.caption)
+                            Text("学习模式：\(automation.learnedPatterns.count)")
+                                .font(.caption)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("🧠 AI能力概览")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+// 新增：自动化任务管理视图
+struct AutomationTasksView: View {
+    @Environment(\.dismiss) var dismiss
+    @StateObject private var automation = AutomationManager.shared
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    Text("已配置的自动化任务：\(automation.automationTasks.count) 个")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                ForEach(automation.automationTasks) { task in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(task.name)
+                                .font(.headline)
+                            
+                            Text(task.description)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        VStack(alignment: .trailing, spacing: 4) {
+                            Text("执行次数：\(task.executionCount)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            
+                            if task.isEnabled {
+                                Text("已启用")
+                                    .font(.caption)
+                                    .foregroundColor(.green)
+                            } else {
+                                Text("已禁用")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(action: {
+                            automation.toggleAutomationTask(id: task.id)
+                        }) {
+                            Label(task.isEnabled ? "禁用" : "启用", systemImage: task.isEnabled ? "pause" : "play")
+                        }
+                        .tint(task.isEnabled ? .orange : .green)
+                        
+                        Button(action: {
+                            automation.removeAutomationTask(id: task.id)
+                        }) {
+                            Label("删除", systemImage: "trash")
+                        }
+                        .tint(.red)
+                    }
+                }
+                
+                Section {
+                    Button(action: {
+                        // 添加新自动化任务（简化版）
+                        automation.addCustomAutomationTask(
+                            type: .time,
+                            title: "自定义自动化",
+                            description: "自定义您的自动化任务",
+                            triggerCondition: "time == 12:00",
+                            action: .pushNotification,
+                            actionData: ["title": "提醒", "message": "这是自定义提醒"]
+                        )
+                    }) {
+                        Label("添加自定义自动化", systemImage: "plus")
+                    }
+                }
+            }
+            .navigationTitle("🔄 自动化任务")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("完成") { dismiss() }
+                }
+            }
+        }
     }
 }
 
@@ -403,5 +844,19 @@ struct TermsOfServiceView: View {
                 }
             }
         }
+    }
+}
+
+// 预览
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SettingsView()
+            .environmentObject(SettingsManager.shared)
+            .environmentObject(AuthManager())
+            .environmentObject(ThemeManager())
+            .environmentObject(LocalizationManager())
+            .environmentObject(FontSizeManager())
+            .EnvironmentObject(AccessibilityManager())
+            .environmentObject(QuickActionManager())
     }
 }

@@ -3,21 +3,56 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var chatManager: ChatManager
+    @StateObject private var predictionAI = PredictionAIManager.shared
+    @StateObject private var proactiveCare = ProactiveCareManager.shared
+    @State private var showCareNotification = false
+    @State private var currentCareMessage = ""
 
     var body: some View {
         Group {
             if authManager.isAuthenticated {
                 MainTabView()
+                    .onAppear {
+                        // 应用启动时初始化预测和关怀
+                        initializePredictionsAndCare()
+                    }
+                    .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CareNotification"))) { notification in
+                        if let message = notification.object as? String {
+                            currentCareMessage = message
+                            showCareNotification = true
+                        }
+                    }
             } else {
                 LoginView()
             }
         }
+        .alert("主动关怀", isPresented: $showCareNotification) {
+            Button("知道了") {
+                showCareNotification = false
+            }
+        } message: {
+            Text(currentCareMessage)
+        }
+    }
+    
+    // MARK: - Initialization
+    
+    private func initializePredictionsAndCare() {
+        // 生成行为预测
+        let predictions = predictionAI.predictBehavior(for: Date())
+        print("🔮 启动预测：\(predictions.count) 个预测")
+        
+        // 检查关怀触发
+        proactiveCare.triggerPredictionReminders()
     }
 }
 
 // 主标签页视图
 struct MainTabView: View {
     @State private var selectedTab = 0
+    @StateObject private var predictionAI = PredictionAIManager.shared
+    @StateObject private var proactiveCare = ProactiveCareManager.shared
+    @StateObject private var personalization = PersonalizationEngine.shared
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -87,6 +122,33 @@ struct MainTabView: View {
                 .tag(14)
         }
         .accentColor(.green)
+        .onChange(of: selectedTab) { newTab in
+            // 切换标签时记录用户行为
+            trackTabChange(newTab)
+        }
+    }
+    
+    // MARK: - Tab Change Tracking
+    
+    private func trackTabChange(_ tab: Int) {
+        let tabNames = [
+            "AI助手", "语音", "备忘", "天气", "翻译", "OCR",
+            "习惯", "健康", "生活", "记账", "提醒", "快捷", "收藏", "插件", "设置"
+        ]
+        
+        if tab < tabNames.count {
+            let tabName = tabNames[tab]
+            
+            // 记录用户行为
+            predictionAI.learnBehavior(action: "tab_\(tabName)", time: Date())
+            
+            // 生成推荐
+            let context: [String: Any] = [
+                "action": "tab_change",
+                "tab": tabName
+            ]
+            _ = personalization.generateRecommendations(context: context)
+        }
     }
 }
 
